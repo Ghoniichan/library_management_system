@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 
 class LibraryApp(tk.Tk):
@@ -20,6 +20,9 @@ class LibraryApp(tk.Tk):
         self.main_content = tk.Frame(self.container, bg="white")
         self.main_content.pack(side="right", fill="both", expand=True)
 
+        # Store books for Book Entry page
+        self.books = []
+
         self.create_sidebar()
         self.create_header()
         self.show_home_page()
@@ -34,6 +37,7 @@ class LibraryApp(tk.Tk):
             ("Home", self.show_home_page),
             ("My Library", self.show_library_page),
             ("Borrower Management", self.show_borrower_page),
+            ("Book Entry", self.show_book_entry_page),
             ("Logout", self.quit)
         ]
 
@@ -101,8 +105,6 @@ class LibraryApp(tk.Tk):
 
             except Exception as e:
                 print(f"Error loading {path}: {e}")
-
-
 
     def show_library_page(self):
         """User's Library"""
@@ -177,6 +179,71 @@ class LibraryApp(tk.Tk):
 
         # Example Data
         table.insert("", "end", values=("John Doe", "Learning Python", "Borrowed", "2025-09-20"))
+
+    # ----------- Integrated Book Entry Page -----------
+    def show_book_entry_page(self):
+        """Book Entry page: add/delete books"""
+        self.clear_main_area()
+
+        content = tk.Frame(self.main_content, bg="white")
+        content.pack(fill="both", expand=True, padx=20, pady=20)
+
+        tk.Label(content, text="Add / Delete Books", font=("Arial", 16, "bold"), bg="white").pack(anchor="w")
+
+        form_frame = tk.Frame(content, bg="white")
+        form_frame.pack(anchor="w", pady=10)
+
+        tk.Label(form_frame, text="Title:", bg="white").grid(row=0, column=0, padx=5, pady=5)
+        self.entry_title = tk.Entry(form_frame, width=30)
+        self.entry_title.grid(row=0, column=1, padx=5, pady=5)
+
+        tk.Label(form_frame, text="Author:", bg="white").grid(row=1, column=0, padx=5, pady=5)
+        self.entry_author = tk.Entry(form_frame, width=30)
+        self.entry_author.grid(row=1, column=1, padx=5, pady=5)
+
+        tk.Label(form_frame, text="Year:", bg="white").grid(row=2, column=0, padx=5, pady=5)
+        self.entry_year = tk.Entry(form_frame, width=30)
+        self.entry_year.grid(row=2, column=1, padx=5, pady=5)
+
+        btn_frame = tk.Frame(content, bg="white")
+        btn_frame.pack(pady=10)
+
+        tk.Button(btn_frame, text="Add Book", command=self.add_book).grid(row=0, column=0, padx=5)
+        tk.Button(btn_frame, text="Delete Book", command=self.delete_book).grid(row=0, column=1, padx=5)
+
+        self.listbox = tk.Listbox(content, width=50, height=10)
+        self.listbox.pack(pady=10)
+
+        self.update_listbox()
+
+    def add_book(self):
+        title = self.entry_title.get()
+        author = self.entry_author.get()
+        year = self.entry_year.get()
+
+        if title and author and year:
+            self.books.append((title, author, year))
+            self.update_listbox()
+            self.entry_title.delete(0, tk.END)
+            self.entry_author.delete(0, tk.END)
+            self.entry_year.delete(0, tk.END)
+        else:
+            messagebox.showwarning("Input Error", "Please fill in all fields.")
+
+    def delete_book(self):
+        selected = self.listbox.curselection()
+        if selected:
+            index = selected[0]
+            self.books.pop(index)
+            self.update_listbox()
+        else:
+            messagebox.showwarning("Selection Error", "Please select a book to delete.")
+
+    def update_listbox(self):
+        self.listbox.delete(0, tk.END)
+        for idx, (title, author, year) in enumerate(self.books, start=1):
+            self.listbox.insert(tk.END, f"{idx}. {title} by {author} ({year})")
+
 
 if __name__ == "__main__":
     app = LibraryApp()
