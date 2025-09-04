@@ -6,9 +6,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.metrics import edit_distance
 
-# ---------------------------
-# NLTK setup (same as original)
-# ---------------------------
+
 nltk.download('vader_lexicon')
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -16,15 +14,11 @@ nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
 sia = SentimentIntensityAnalyzer()
 
-# ===========================
-# In-memory data (same structure)
-# ===========================
-books = {}      # { book_id: {title, author, available, reviews: [(text, label)], keywords:set(...) } }
-borrowers = {}  # { borrower_id: {name, name_tokens:[...], borrowed_books:[book_ids]} }
 
-# ===========================
-# Core functions (logic preserved)
-# ===========================
+books = {}      
+borrowers = {} 
+
+
 
 def add_book_logic(book_id, title, author):
     if not book_id or not title or not author:
@@ -169,27 +163,26 @@ class App:
         self.root.geometry("1200x720")
         self.root.configure(bg="#f5f6fa")
 
-        # ttk style
+        #style
         self._setup_style()
 
-        # ---- Topbar ----
+        # top
         self._build_topbar()
 
-        # ---- Sidebar ----
+        # sidebar
         self._build_sidebar()
 
-        # ---- Main content (switchable) ----
+        # Main content 
         self.main = tk.Frame(self.root, bg="#f5f6fa")
         self.main.pack(side="right", fill="both", expand=True)
 
-        # Instance refs for manage view treeviews
         self.book_tree = None
         self.borrower_tree = None
 
         # Default view
         self.show_home()
 
-    # ---------------- Style ----------------
+    #  Style
     def _setup_style(self):
         style = ttk.Style()
         style.theme_use("clam")
@@ -218,7 +211,7 @@ class App:
 
         style.configure("TEntry", padding=6, font=("Segoe UI", 11))
 
-    # ---------------- Topbar ----------------
+    #  Topbar 
     def _build_topbar(self):
         top = tk.Frame(self.root, bg="white", height=64, bd=0, highlightthickness=1, highlightbackground="#e5e7eb")
         top.pack(side="top", fill="x")
@@ -231,7 +224,7 @@ class App:
 
         ttk.Button(top, text="🔎 Search", style="Primary.TButton", command=self.search_view).pack(side="left", padx=6)
 
-    # ---------------- Sidebar ----------------
+    #  Sidebar
     def _build_sidebar(self):
         side = tk.Frame(self.root, bg="#111827", width=220)
         side.pack(side="left", fill="y")
@@ -250,7 +243,7 @@ class App:
         side_btn("👤  Add Borrower", self.show_add_borrower)
         side_btn("🚪  Logout", self.root.quit)
 
-    # ---------------- Helpers ----------------
+    # Helpers
     def _clear_main(self):
         for w in self.main.winfo_children():
             w.destroy()
@@ -267,7 +260,7 @@ class App:
         lab = tk.Label(parent, text=text, bg=bg, fg=fg, font=("Segoe UI", 9, "bold"))
         lab.pack(side="left", padx=4, pady=2, ipadx=6, ipady=2)
 
-    # ---------------- Views ----------------
+    #  Views 
     def show_home(self):
         self._clear_main()
         self._section_title(self.main, "📌 Recommended / All Books")
@@ -471,7 +464,7 @@ class App:
                        state=("normal" if info['available'] else "disabled"),
                        command=lambda b=book_id: self._borrow_and_refresh(b)).pack(side="left", padx=4)
 
-    # ---------- Book Details + Reviews (live update after save) ----------
+    # Book Details + Reviews 
     def open_book_details(self, book_id):
         if book_id not in books:
             messagebox.showerror("Error", "Book not found!")
@@ -530,14 +523,14 @@ class App:
             label = add_review_logic(book_id, text)
             if label:
                 review_var.set("")
-                refresh_reviews()  # ✅ live update after save
+                refresh_reviews()  #  live update after save
 
         btns = tk.Frame(win, bg="white")
         btns.pack(fill="x", padx=16, pady=8)
         ttk.Button(btns, text="Save Review", style="Primary.TButton", command=save_review).pack(side="left", padx=4)
         ttk.Button(btns, text="Close", style="Ghost.TButton", command=win.destroy).pack(side="left", padx=4)
 
-    # ---------------- List updaters (Manage view) ----------------
+    # List updaters (Manage view) 
     def update_book_list(self):
         if not self.book_tree:
             return
@@ -554,10 +547,9 @@ class App:
             borrowed_books_str = ", ".join(info['borrowed_books'])
             self.borrower_tree.insert("", "end", values=(borrower_id, info['name'], borrowed_books_str))
 
-    # ---------------- Circulation triggers (keep NLP dialogs) ----------------
+    #  Circulation triggers (keep NLP dialogs) 
     def _borrow_and_refresh(self, _book_id=None):
         brr_id, b_id = borrow_book_logic()
-        # refresh visible views
         if b_id:
             self.update_book_list()
             self.update_borrower_list()
@@ -570,9 +562,7 @@ class App:
             self.update_borrower_list()
             self.show_my_library()
 
-# ===========================
-# Run
-# ===========================
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = App(root)
