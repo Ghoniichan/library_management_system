@@ -20,7 +20,7 @@ class LibraryApp(tk.Tk):
         self.main_content = tk.Frame(self.container, bg="white")
         self.main_content.pack(side="right", fill="both", expand=True)
 
-        # Store books for Book Entry page
+        # Store books for Book Entry & Search pages
         self.books = []
 
         self.create_sidebar()
@@ -38,6 +38,7 @@ class LibraryApp(tk.Tk):
             ("My Library", self.show_library_page),
             ("Borrower Management", self.show_borrower_page),
             ("Book Entry", self.show_book_entry_page),
+            ("Search Books", self.show_search_page),
             ("Logout", self.quit)
         ]
 
@@ -180,7 +181,6 @@ class LibraryApp(tk.Tk):
         # Example Data
         table.insert("", "end", values=("John Doe", "Learning Python", "Borrowed", "2025-09-20"))
 
-    # ----------- Integrated Book Entry Page -----------
     def show_book_entry_page(self):
         """Book Entry page: add/delete books"""
         self.clear_main_area()
@@ -243,6 +243,46 @@ class LibraryApp(tk.Tk):
         self.listbox.delete(0, tk.END)
         for idx, (title, author, year) in enumerate(self.books, start=1):
             self.listbox.insert(tk.END, f"{idx}. {title} by {author} ({year})")
+
+    def show_search_page(self):
+        """Search Books page"""
+        self.clear_main_area()
+
+        content = tk.Frame(self.main_content, bg="white")
+        content.pack(fill="both", expand=True, padx=20, pady=20)
+
+        tk.Label(content, text="Search Books", font=("Arial", 16, "bold"), bg="white").pack(anchor="w")
+
+        # Search input
+        search_frame = tk.Frame(content, bg="white")
+        search_frame.pack(anchor="w", pady=10)
+
+        tk.Label(search_frame, text="Search:", bg="white").grid(row=0, column=0, padx=5, pady=5)
+        self.entry_search = tk.Entry(search_frame, width=30)
+        self.entry_search.grid(row=0, column=1, padx=5, pady=5)
+
+        tk.Button(search_frame, text="Search", command=self.search_books).grid(row=0, column=2, padx=5, pady=5)
+
+        # Results Listbox
+        self.listbox_search = tk.Listbox(content, width=50, height=10)
+        self.listbox_search.pack(pady=10)
+
+    def search_books(self):
+        query = self.entry_search.get().lower()
+        if not query:
+            messagebox.showwarning("Input Error", "Please type something to search.")
+            return
+
+        self.listbox_search.delete(0, tk.END)
+        found = False
+
+        for idx, (title, author, year) in enumerate(self.books, start=1):
+            if query in title.lower() or query in author.lower() or query in year:
+                self.listbox_search.insert(tk.END, f"{idx}. {title} by {author} ({year})")
+                found = True
+
+        if not found:
+            self.listbox_search.insert(tk.END, "No results found.")
 
 
 if __name__ == "__main__":
