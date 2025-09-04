@@ -93,7 +93,7 @@ class LibraryApp(tk.Tk):
 
                 # Book image
                 label = tk.Label(card, image=photo, bg="white")
-                label.image = photo  # keep reference
+                label.image = photo  # type: ignore # keep reference
                 label.pack(side="top")
 
                 # Rating below image
